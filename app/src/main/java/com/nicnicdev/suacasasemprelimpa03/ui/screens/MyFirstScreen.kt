@@ -1,5 +1,6 @@
 package com.nicnicdev.suacasasemprelimpa03.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -24,10 +25,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import com.nicnicdev.suacasasemprelimpa03.ui.screens.navigation.Screen
 import com.nicnicdev.suacasasemprelimpa03.ui.theme.SuaCasaSempreLimpa03Theme
 
 @Composable
-fun MyFirstScreen() {
+fun MyFirstScreen(navController: NavHostController) {
+
     var login by remember { mutableStateOf("") } // estado para login
     var password by remember { mutableStateOf("") } // estado para senha
 
@@ -82,7 +88,8 @@ fun MyFirstScreen() {
                 )
                 // botão entrar
                 Button(
-                    onClick = { /*ação ao clicar*/ },
+                    onClick = { Log.d( "Navigation" , "Navegando para tela agendamento de tarefas")
+                              navController.navigate(Screen.Options.route)},
                     modifier = Modifier
                         .padding(top = 26.dp) //largura extra acima do botão
                         .width(200.dp) // largura do botão
@@ -93,7 +100,8 @@ fun MyFirstScreen() {
             Spacer(modifier = Modifier.height(40.dp))
 
             Button(
-                onClick = { /*ação ao clicar*/ },
+                onClick = { Log.d("Navigation", "Navegação para tela cadstro")
+                         navController.navigate(Screen.Register.route) },
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally) // deixa o botão centralizado
             ) {
@@ -106,7 +114,8 @@ fun MyFirstScreen() {
 @Preview(showBackground = true)
 @Composable
 fun MyFirstScreenPreview() {
+    val navController = rememberNavController()
     SuaCasaSempreLimpa03Theme {
-        MyFirstScreen()
+        MyFirstScreen(navController = navController)
     }
 }
