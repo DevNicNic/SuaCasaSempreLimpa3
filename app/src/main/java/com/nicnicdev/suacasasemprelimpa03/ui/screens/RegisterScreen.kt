@@ -22,10 +22,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegisterScreen() {
+fun RegisterScreen(navController: NavController) {
     // estados para armazenar os valores inseridos nos campos
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -33,7 +35,7 @@ fun RegisterScreen() {
 
     Scaffold(
         topBar = {
-            Button(onClick = { /*TODO*/ }) {
+            Button(onClick = { navController.popBackStack()}) {
                 Text(text = "Voltar")
             }
         }
@@ -95,5 +97,5 @@ fun RegisterScreen() {
 @Preview(showBackground = true)
 @Composable
 fun RegisterScreenPreview() {
-    RegisterScreen()
+    RegisterScreen(navController = rememberNavController())
 }
