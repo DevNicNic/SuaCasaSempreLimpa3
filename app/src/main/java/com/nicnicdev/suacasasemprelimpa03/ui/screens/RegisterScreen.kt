@@ -35,7 +35,7 @@ fun RegisterScreen(navController: NavController) {
 
     Scaffold(
         topBar = {
-            Button(onClick = { navController.popBackStack()}) {
+            Button(onClick = { navController.popBackStack() }) {
                 Text(text = "Voltar")
             }
         }
