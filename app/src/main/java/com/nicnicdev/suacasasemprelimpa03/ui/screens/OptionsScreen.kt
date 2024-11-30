@@ -19,8 +19,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.nicnicdev.suacasasemprelimpa03.R
-import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
+import com.nicnicdev.suacasasemprelimpa03.ui.screens.navigation.Screen
 
 
 @Composable
@@ -55,7 +57,7 @@ fun ButtonWithImage(
 }
 
 @Composable
-fun OptionsScreen() {
+fun OptionsScreen(navController: NavHostController) {
     Column(
         Modifier
             .fillMaxSize()
@@ -67,7 +69,7 @@ fun OptionsScreen() {
             textButton = "Casa Sempre Limpa Dicas",
             descriptionImage = "Imagem para Dicas",
             resourceImage = R.drawable.imagem1,
-            onClick = {/*ação botão*/ }
+            onClick = {navController.navigate(Screen.TipsHome.route) }
         )
         ButtonWithImage(
             textButton = "Agendar Tarefas Diárias",
@@ -88,5 +90,5 @@ fun OptionsScreen() {
 @Preview(showBackground = true)
 @Composable
 fun OptionsScreenPreview() {
-    OptionsScreen()
+    OptionsScreen(navController = rememberNavController())
 }
