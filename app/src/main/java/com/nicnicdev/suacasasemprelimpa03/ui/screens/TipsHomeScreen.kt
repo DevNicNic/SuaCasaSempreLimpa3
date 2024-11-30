@@ -34,10 +34,11 @@ import com.nicnicdev.suacasasemprelimpa03.domain.model.Category
 @Composable
 fun TipsHomeScreen(userName: String, onCategoryClick: (String) -> Unit) {
     val categories = CategoryDataSource().getCategories()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(horizontal = 16.dp),
     ) {
         //saudação no topo da tela
         Text(
@@ -50,7 +51,7 @@ fun TipsHomeScreen(userName: String, onCategoryClick: (String) -> Unit) {
                 .padding(top = 30.dp) // Espaço no topo para afastar o texto da borda
         )
 
-        Spacer(modifier = Modifier.height(40.dp)) // Define 16dp de espaço (ou ajuste conforme necessário)
+        Spacer(modifier = Modifier.height(16.dp)) // Define 16dp de espaço (ou ajuste conforme necessário)
 
         //Grade com intens
         LazyVerticalGrid(
