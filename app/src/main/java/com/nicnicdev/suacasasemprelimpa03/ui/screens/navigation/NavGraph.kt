@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.nicnicdev.suacasasemprelimpa03.ui.screens.KitchenTipsScreen
 import com.nicnicdev.suacasasemprelimpa03.ui.screens.MyFirstScreen
 import com.nicnicdev.suacasasemprelimpa03.ui.screens.OptionsScreen
 import com.nicnicdev.suacasasemprelimpa03.ui.screens.RegisterScreen
@@ -16,6 +17,7 @@ sealed class Screen (val route: String){
     data object Options : Screen ("options_screen")
     data object TipsHome : Screen ( "tips_home_screen")
     data object Shedule : Screen ("shedule_taks_screen")
+    data object Kitchen : Screen ("kitchen_tips_screen")
 }
 
 @Composable
@@ -37,14 +39,20 @@ fun SetupNavGraph (navController: NavHostController) {
             TipsHomeScreen(
                 userName = "Nicole",
                 onCategoryClick = { category ->
-
+                    if (category == "Cozinha") {
+                        navController.navigate(Screen.Kitchen.route)
+                    }
                 }
-
             )
         }
         composable(route= Screen.Shedule.route) {
             ScheduleTasksScreen(userName = "Nicole")
         }
+        composable (route = Screen.Kitchen.route)  {
+            KitchenTipsScreen (
+                onBackClik = {navController.popBackStack()} //volta para a tela anterior
+            )
+        }
     }
-
 }
+
