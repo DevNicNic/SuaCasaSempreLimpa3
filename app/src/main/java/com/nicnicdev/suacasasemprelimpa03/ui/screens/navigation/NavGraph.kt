@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import com.nicnicdev.suacasasemprelimpa03.ui.screens.MyFirstScreen
 import com.nicnicdev.suacasasemprelimpa03.ui.screens.OptionsScreen
 import com.nicnicdev.suacasasemprelimpa03.ui.screens.RegisterScreen
+import com.nicnicdev.suacasasemprelimpa03.ui.screens.ScheduleTasksScreen
 import com.nicnicdev.suacasasemprelimpa03.ui.screens.TipsHomeScreen
 
 sealed class Screen (val route: String){
@@ -14,6 +15,7 @@ sealed class Screen (val route: String){
     data object Register : Screen ("register_screen")
     data object Options : Screen ("options_screen")
     data object TipsHome : Screen ( "tips_home_screen")
+    data object Shedule : Screen ("shedule_taks_screen")
 }
 
 @Composable
@@ -37,7 +39,11 @@ fun SetupNavGraph (navController: NavHostController) {
                 onCategoryClick = { category ->
 
                 }
+
             )
+        }
+        composable(route= Screen.Shedule.route) {
+            ScheduleTasksScreen(userName = "Nicole")
         }
     }
 
