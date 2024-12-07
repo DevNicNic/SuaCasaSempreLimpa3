@@ -86,7 +86,7 @@ fun KitchenTipsScreen (onBackClik: () -> Unit) {
                     ) {
                         Image(
                             painter = defaultImage,
-                            contentDescription ="Imagem Padrão da Dica",
+                            contentDescription ="Imagem Padrão da Dicas Cozinha",
                             modifier = Modifier
                                 .size(64.dp)
                                 .clip(CircleShape),
