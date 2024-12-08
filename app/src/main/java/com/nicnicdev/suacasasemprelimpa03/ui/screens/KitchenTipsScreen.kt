@@ -45,7 +45,8 @@ fun KitchenTipsScreen (onBackClik: () -> Unit) {
                 title = { Text ("Dicas para Cozinha")},
                 navigationIcon = {
                     IconButton(onClick = onBackClik) {
-                        Icon(Icons.Default.ArrowBack,contentDescription = "Voltar ")
+                        Icon(Icons.Default.ArrowBack,
+                            contentDescription = "Voltar ")
 
                     }
                 }

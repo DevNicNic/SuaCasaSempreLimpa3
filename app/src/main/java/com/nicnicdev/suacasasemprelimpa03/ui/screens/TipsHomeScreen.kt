@@ -42,8 +42,7 @@ import com.nicnicdev.suacasasemprelimpa03.domain.model.Category
 fun TipsHomeScreen(
     userName: String,
     onCategoryClick: (String) -> Unit,
-    onBackClik: () -> Unit // parametro para ação voltar
-) {
+    ) {
     val categories = CategoryDataSource().getCategories()
 
     Scaffold(
@@ -142,5 +141,5 @@ fun CategoryCard(category: Category, onClick: () -> Unit) {
 @Preview(showBackground = true)
 @Composable
 fun TipsHomeScreenPreview() {
-    TipsHomeScreen(userName = "Nicole", onCategoryClick = {}, onBackClik = {})
+    TipsHomeScreen(userName = "Nicole", onCategoryClick = {})
 }
