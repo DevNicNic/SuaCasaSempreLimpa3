@@ -15,10 +15,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,42 +37,62 @@ import com.nicnicdev.suacasasemprelimpa03.data.CategoryDataSource
 import com.nicnicdev.suacasasemprelimpa03.domain.model.Category
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TipsHomeScreen(userName: String, onCategoryClick: (String) -> Unit) {
+fun TipsHomeScreen(
+    userName: String,
+    onCategoryClick: (String) -> Unit,
+    onBackClik: () -> Unit // parametro para ação voltar
+) {
     val categories = CategoryDataSource().getCategories()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp),
-    ) {
-        //saudação no topo da tela
-        Text(
-            text = "Olá $userName, Bem vindo ao Dicas Sua Casa Sempre Limpa",
-            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp),
-            textAlign = TextAlign.Center,
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { "" },
+                navigationIcon = {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack, //icone da seta
+                        contentDescription = "Voltar"
+                    )
+                }
+            )
+        }
+    ) { paddingValue ->
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp)
-                .padding(top = 30.dp) // Espaço no topo para afastar o texto da borda
-        )
-
-        Spacer(modifier = Modifier.height(16.dp)) // Define 16dp de espaço (ou ajuste conforme necessário)
-
-        //Grade com intens
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2), //duas colunas
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = Modifier.fillMaxSize()
+                .fillMaxSize()
+                .padding(paddingValue)
+                .padding(horizontal = 16.dp),
         ) {
-            //Adiciona todos os itens da lista
-            items(categories.size) { index ->
-                val category = categories[index]
-                CategoryCard(
-                    category = category,
-                    onClick = { onCategoryClick(category.name) }
-                )
+            //saudação no topo da tela
+            Text(
+                text = "Olá $userName, Bem vindo ao Dicas Sua Casa Sempre Limpa",
+                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp),
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+                    .padding(top = 30.dp) // Espaço no topo para afastar o texto da borda
+            )
+
+            Spacer(modifier = Modifier.height(16.dp)) // Define 16dp de espaço (ou ajuste conforme necessário)
+
+            //Grade com intens
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2), //duas colunas
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier.fillMaxSize()
+            ) {
+                //Adiciona todos os itens da lista
+                items(categories.size) { index ->
+                    val category = categories[index]
+                    CategoryCard(
+                        category = category,
+                        onClick = { onCategoryClick(category.name) }
+                    )
+                }
             }
         }
     }
@@ -116,5 +142,5 @@ fun CategoryCard(category: Category, onClick: () -> Unit) {
 @Preview(showBackground = true)
 @Composable
 fun TipsHomeScreenPreview() {
-    TipsHomeScreen(userName = "Nicole", onCategoryClick = {})
+    TipsHomeScreen(userName = "Nicole", onCategoryClick = {}, onBackClik = {})
 }
