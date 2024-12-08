@@ -64,7 +64,7 @@ fun SetupNavGraph (navController: NavHostController) {
             )
         }
         composable(route = Screen.Shedule.route) {
-            ScheduleTasksScreen(userName = "Nicole") // tela de agendamento
+            ScheduleTasksScreen(userName = "Nicole",  onBackClick = {}) // tela de agendamento
         }
         composable(route = Screen.Category.Kitchen.route) {
             KitchenTipsScreen (onBackClik = {navController.popBackStack()})
