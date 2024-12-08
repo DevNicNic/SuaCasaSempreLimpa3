@@ -9,11 +9,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,8 +36,9 @@ import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import java.time.LocalDate
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ScheduleTasksScreen(userName: String) {
+fun ScheduleTasksScreen(userName: String, onBackClick: () -> Unit) {
     // Estado para guardar a lista de dados selecionadas
     var selectedDates by remember { mutableStateOf<List<LocalDate>>(emptyList()) }
     //estado do dialogo de seleção de data
@@ -39,7 +46,21 @@ fun ScheduleTasksScreen(userName: String) {
 
 
     // layout principal
-    Scaffold { padding ->
+    Scaffold (
+        topBar = {
+            TopAppBar(
+                title = { Text(text = "") },
+                navigationIcon = {
+                    IconButton(onClick = { onBackClick }) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack ,
+                            contentDescription = "Voltar"
+                        )
+                    }
+                }
+            )
+        }
+    ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -122,5 +143,5 @@ fun ScheduleTasksScreen(userName: String) {
 @Preview(showBackground = true)
 @Composable
 fun ScheduleTasksScreenPreview() {
-    ScheduleTasksScreen(userName = "Nicole")
+    ScheduleTasksScreen(userName = "Nicole", onBackClick = {})
 }
