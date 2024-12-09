@@ -1,7 +1,10 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("com.google.devtools.ksp") version  "1.9.0-1.0.13"
+
 }
+
 
 android {
     namespace = "com.nicnicdev.suacasasemprelimpa03"
@@ -51,6 +54,10 @@ android {
 
 dependencies {
 
+    implementation("io.insert-koin:koin-android:3.5.0")
+    implementation("io.insert-koin:koin-androidx-compose:3.5.0")
+    implementation("io.insert-koin:koin-annotations:2.0.0-Beta1")
+    ksp("io.insert-koin:koin-ksp-compiler:2.0.0-Beta1")
     implementation("io.github.vanpra.compose-material-dialogs:datetime:0.9.0")
     implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
