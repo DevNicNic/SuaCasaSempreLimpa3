@@ -48,8 +48,7 @@ fun RegisterScreen(
 
     val uiState by viewModel.uiState.collectAsState()
 
-    Scaffold(
-        topBar = {
+    Scaffold(topBar = {
             TopAppBar(
                 title = { Text("") },
                 navigationIcon = {
