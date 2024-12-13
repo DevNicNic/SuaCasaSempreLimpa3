@@ -16,6 +16,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,14 +30,19 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.nicnicdev.suacasasemprelimpa03.ui.register.LoginViewModel
 import com.nicnicdev.suacasasemprelimpa03.ui.screens.navigation.Screen
 import com.nicnicdev.suacasasemprelimpa03.ui.theme.SuaCasaSempreLimpa03Theme
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun MyFirstScreen(navController: NavHostController) {
-
+fun MyFirstScreen(navController: NavHostController,
+                  viewModel: LoginViewModel = koinViewModel()
+) {
     var login by remember { mutableStateOf("") } // estado para login
     var password by remember { mutableStateOf("") } // estado para senha
+
+    val uiState by viewModel.uiState.collectAsState() // estado sa interface do ViewModel
 
     Scaffold { contentPadding ->
         Column(
@@ -67,7 +74,8 @@ fun MyFirstScreen(navController: NavHostController) {
                     value = login,
                     onValueChange = { login = it },
                     label = { Text("Login") },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = uiState.error != null
                 )
                 // campo senha
                 OutlinedTextField(
@@ -75,8 +83,18 @@ fun MyFirstScreen(navController: NavHostController) {
                     onValueChange = { password = it },
                     label = { Text("Senha") },
                     modifier = Modifier.fillMaxWidth(),
-                    visualTransformation = PasswordVisualTransformation() //para ocultar senha
+                    visualTransformation = PasswordVisualTransformation(), //para ocultar senha
+                    isError = uiState.error != null
                 )
+
+                uiState.error?.let { errorMessage ->
+                    Text(
+                        text = errorMessage,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
                 // texto clicavel "esqueci a senha"
                 Text(
                     text = "Esqueci a Senha.",
@@ -88,8 +106,9 @@ fun MyFirstScreen(navController: NavHostController) {
                 )
                 // botão entrar
                 Button(
-                    onClick = { Log.d( "Navigation" , "Navegando para tela agendamento de tarefas")
-                              navController.navigate(Screen.Options.route)},
+                    onClick = {
+                              viewModel.onLogin(login, password)
+                    },
                     modifier = Modifier
                         .padding(top = 26.dp) //largura extra acima do botão
                         .width(200.dp) // largura do botão
@@ -100,12 +119,19 @@ fun MyFirstScreen(navController: NavHostController) {
             Spacer(modifier = Modifier.height(40.dp))
 
             Button(
-                onClick = { Log.d("Navigation", "Navegação para tela cadstro")
+                onClick = { Log.d("Navigation", "Navegação para tela cadastro")
                          navController.navigate(Screen.Register.route) },
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally) // deixa o botão centralizado
             ) {
                 Text(text = "CADASTRE-SE")
+            }
+        }
+        if (uiState.success){
+            LaunchedEffect(Unit) {
+                navController.navigate(Screen.Options.route){
+                    popUpTo(Screen.Main.route) {inclusive = true}
+                }
             }
         }
     }
