@@ -14,10 +14,21 @@ class RegistrationRepository(context: Context) {
                 email = user.email,
                 password = user.password
             )
-            userDao.insertUser(userEntity)  //esse é o ponto onde os dados são sslvos no banco
+            userDao.insertUser(userEntity)  //esse é o ponto onde os dados são salvos no banco
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+
+    // método para verificar login
+    suspend fun login (email: String, password: String): Result<UserEntity> {
+        return try {
+            val user = userDao.getUser (email, password)
+            if (user != null) Result.success(user) else Result.failure(Exception("Usuário não encontrado "))
+        } catch (e:Exception){
+            Result.failure(e)
+        }
+
     }
 }
