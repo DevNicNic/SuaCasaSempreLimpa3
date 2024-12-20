@@ -58,7 +58,7 @@ dependencies {
 
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
     implementation ("androidx.room:room-runtime:2.5.2")
-    kapt ("androidx.room:room-compiler:2.5.2")
+    ksp ("androidx.room:room-compiler:2.5.2")
     implementation ("androidx.room:room-ktx:2.5.0")
     implementation("io.insert-koin:koin-android:3.5.0")
     implementation("io.insert-koin:koin-androidx-compose:3.5.0")

@@ -4,7 +4,7 @@ import android.content.Context
 import com.nicnicdev.suacasasemprelimpa03.domain.model.UserRegistration
 import java.lang.Exception
 
-class RegistrationRepository(context: Context) {
+class RegistrationRepository(private val context: Context) {
     private val userDao = DatabaseProvider.getDatabase(context).userDao()
 
    suspend fun register(user: UserRegistration): Result<Unit> {
