@@ -9,6 +9,7 @@ interface UserDao {
     @Insert
     suspend fun insertUser (user: UserEntity): Long
 
+    // consulta do usuário por email e senha
     @Query("SELECT * FROM users WHERE email = :email AND password = :password")
     suspend fun getUser ( email: String, password: String): UserEntity?
 }
