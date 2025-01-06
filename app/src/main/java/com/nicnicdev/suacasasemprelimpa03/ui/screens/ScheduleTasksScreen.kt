@@ -18,12 +18,16 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,7 +37,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vanpra.composematerialdialogs.MaterialDialog
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
+import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.Year
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -41,27 +47,33 @@ import java.time.LocalDate
 fun ScheduleTasksScreen(userName: String, onBackClick: () -> Unit) {
     // Estado para guardar a lista de dados selecionadas
     var selectedDates by remember { mutableStateOf<List<LocalDate>>(emptyList()) }
+    var taskMap by remember { mutableStateOf(mutableMapOf<LocalDate, MutableList<String>>()) }
+    var newTask by remember { mutableStateOf("") }
     //estado do dialogo de seleção de data
     val dateDialogState = rememberMaterialDialogState()
-
+    // estado do Snackbar
+    val snackbarHostState = remember { SnackbarHostState() }
+    // estado para controlar se o botão "salvar tarefas" esta habilitado
+    val isSaveEnabled = selectedDates.isNotEmpty()
 
     // layout principal
-    Scaffold (
+    Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text(text = "") },
                 navigationIcon = {
                     IconButton(onClick = { onBackClick }) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack ,
+                            imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Voltar"
                         )
                     }
                 }
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) } // adiciona o snackbar
     ) { padding ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
@@ -69,75 +81,142 @@ fun ScheduleTasksScreen(userName: String, onBackClick: () -> Unit) {
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = "Olá, $userName ! Bem vindo ao Agendar Tarefas Diárias! " +
-                        "Aqui você pode organizar suas atividade de forma prática " +
-                        "e eficiente.",
-                style = MaterialTheme.typography.headlineMedium.copy(
-                    fontSize = 16.sp
-                ),
-                textAlign = TextAlign.Center
-            )
-            //botão para abrir o calendario
-            Button(
-                onClick = { dateDialogState.show() },
-                modifier = Modifier.padding(top = 16.dp)
-            ) {
-                Text(text = "Selecionar Data")
+            item {
+                Text(
+                    text = "Olá, $userName ! Bem vindo ao Agendar Tarefas Diárias! " +
+                            "Aqui você pode organizar suas atividade de forma prática " +
+                            "e eficiente.",
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontSize = 16.sp
+                    ),
+                    textAlign = TextAlign.Center
+                )
+            }
+            item {   //botão para abrir o calendario
+                Button(
+                    onClick = { dateDialogState.show() },
+                    modifier = Modifier.padding(top = 16.dp)
+                ) {
+                    Text(text = "Selecionar Data")
+                }
             }
             // exibir as datas selecionadas
             if (selectedDates.isNotEmpty()) {
-                Text(
-                    text = "Datas Selecionadas: ${
-                        selectedDates.joinToString(",")
-                        { "${it.dayOfMonth}/${it.monthValue}/${it.year}" }
-                    }",
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
+                item {
+                    Text(
+                        text = "Datas Selecionadas: ${
+                            selectedDates.joinToString(",")
+                            { "${it.dayOfMonth}/${it.monthValue}/${it.year}" }
+                        }",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
+            }
+            selectedDates.forEach() { date ->
+                item {
+                    Text(
+                        text = "Tarefas para ${date.dayOfMonth}/${date.monthValue}/${date.year}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(top = 16.dp)
+                    )
+                }
+                item {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    ) {
+                        TextField(
+                            value = newTask,
+                            onValueChange = { newTask = it },
+                            placeholder = { Text(text = "Digite uma nova tarefa") },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 8.dp)
+                        )
+                        Button(
+                            onClick = {
+                                if (newTask.isNotBlank()) {
+                                    taskMap[date] =
+                                        (taskMap[date] ?: mutableListOf()).apply { add(newTask) }
+                                    newTask = ""
+                                }
+                            },
+                            modifier = Modifier.align(Alignment.End)
+                        ) {
+                            Text(text = "Adicionar Tarefa")
+                        }
+                        taskMap[date]?.forEach { task ->
+                                    Text(
+                                        text = "-$task",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        modifier = Modifier.padding(top = 4.dp)
+                                    )
+
+                                }
+                            }
+                        }
+                    }
+
+
+            item {
+                val coroutineScope = rememberCoroutineScope()
+
+                Button(
+                    onClick = {
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar("Tarefas salvas com sucesso!")
+                        }
+                    },
+                    enabled = isSaveEnabled,  // habilitado apenas se houver datas selecionadas
+                    modifier = Modifier.padding(top = 16.dp)
+                ) {
+                    Text(text = "Salvar Tarefas ")
+
+                }
             }
         }
-    }
-    MaterialDialog(dialogState = dateDialogState, buttons = {
-        positiveButton("Confirmar")
-        negativeButton("Cancelar")
-    }) {
-        // Lista de dias do mês atual para seleção
-        val today = LocalDate.now()
-        val daysInMonth = today.lengthOfMonth()
-        val datesInMonth = List(daysInMonth) { today.withDayOfMonth(it + 1) }
-
-        LazyColumn {
-            items(datesInMonth) { date ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                        .clickable {
-                            if (selectedDates.contains(date)) {
-                                selectedDates = selectedDates - date
-                            } else {
-                                selectedDates = selectedDates + date
+        MaterialDialog(dialogState = dateDialogState, buttons = {
+            positiveButton("Confirmar")
+            negativeButton("Cancelar")
+        }) {
+            // Lista de todas as datas do ano atual
+            val currentYear = Year.now().value
+            val datesInYear = List(Year.of(currentYear).length()) { day ->
+                LocalDate.ofYearDay(currentYear, day + 1)
+            }
+            LazyColumn {
+                items(datesInYear) { date ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                            .clickable {
+                                if (selectedDates.contains(date)) {
+                                    selectedDates = selectedDates - date
+                                } else {
+                                    selectedDates = selectedDates + date
+                                }
                             }
-                        }
-                ) {
-                    Checkbox(
-                        checked = selectedDates.contains(date),
-                        onCheckedChange = {
-                            if (it) {
-                                selectedDates = selectedDates + date
-                            } else {
-                                selectedDates = selectedDates - date
+                    ) {
+                        Checkbox(
+                            checked = selectedDates.contains(date),
+                            onCheckedChange = {
+                                if (it) {
+                                    selectedDates = selectedDates + date
+                                } else {
+                                    selectedDates = selectedDates - date
+                                }
                             }
-                        }
-                    )
-                    Text(text = "${date.dayOfMonth}/${date.monthValue}/${date.year}")
+                        )
+                        Text(text = "${date.dayOfMonth}/${date.monthValue}/${date.year}")
+                    }
                 }
             }
         }
     }
-
 }
 
 @Preview(showBackground = true)
