@@ -47,8 +47,8 @@ import java.time.Year
 fun ScheduleTasksScreen(userName: String, onBackClick: () -> Unit) {
     // Estado para guardar a lista de dados selecionadas
     var selectedDates by remember { mutableStateOf<List<LocalDate>>(emptyList()) }
-    var taskMap by remember { mutableStateOf(mutableMapOf<LocalDate, MutableList<String>>()) }
-    var newTask by remember { mutableStateOf("") }
+    var taskMap by remember { mutableStateOf(mutableMapOf<LocalDate, List<String>>()) }
+    var newTaskMap by remember { mutableStateOf(mutableMapOf<LocalDate, String>()) }
     //estado do dialogo de seleção de data
     val dateDialogState = rememberMaterialDialogState()
     // estado do Snackbar
@@ -128,8 +128,10 @@ fun ScheduleTasksScreen(userName: String, onBackClick: () -> Unit) {
                             .padding(8.dp)
                     ) {
                         TextField(
-                            value = newTask,
-                            onValueChange = { newTask = it },
+                            value = newTaskMap[date] ?:"",
+                            onValueChange = { newValue -> newTaskMap = newTaskMap.toMutableMap().apply {
+                                this [date] = newValue
+                            } },
                             placeholder = { Text(text = "Digite uma nova tarefa") },
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -137,10 +139,15 @@ fun ScheduleTasksScreen(userName: String, onBackClick: () -> Unit) {
                         )
                         Button(
                             onClick = {
-                                if (newTask.isNotBlank()) {
-                                    taskMap[date] =
-                                        (taskMap[date] ?: mutableListOf()).apply { add(newTask) }
-                                    newTask = ""
+                                val task = newTaskMap [date]?.trim()
+                                if (!task.isNullOrEmpty()) {
+                                    taskMap = taskMap.toMutableMap().apply {
+                                        val currentTasks = this[date] ?: emptyList()
+                                        this[date] = currentTasks + task
+                                    }
+                                    newTaskMap  = newTaskMap.toMutableMap().apply {
+                                        this[date] = ""
+                                    }
                                 }
                             },
                             modifier = Modifier.align(Alignment.End)
