@@ -37,6 +37,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.nicnicdev.suacasasemprelimpa03.domain.TaskManager
 import com.vanpra.composematerialdialogs.MaterialDialog
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import kotlinx.coroutines.launch
@@ -48,14 +49,11 @@ import java.util.Calendar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScheduleTasksScreen(userName: String, onBackClick: () -> Unit) {
+    val taskManager = remember { TaskManager<LocalDate>() }
 
-    var selectedDates by remember { mutableStateOf<List<LocalDate>>(emptyList()) } // Estado para guardar a lista de dados selecionadas
-    var taskMap by remember { mutableStateOf(mutableMapOf<LocalDate, List<String>>()) }
-    var newTaskMap by remember { mutableStateOf(mutableMapOf<LocalDate, String>()) }
-    val dateDialogState = rememberMaterialDialogState() //estado do dialogo de seleção de data
-    val snackbarHostState = remember { SnackbarHostState() } // estado do Snackbar
-    val isSaveEnabled =
-        selectedDates.isNotEmpty() // estado para controlar se o botão "salvar tarefas" esta habilitado
+    val snackbarHostState = remember { SnackbarHostState() }
+    val dateDialogState = rememberMaterialDialogState()
+
 
     // layout principal
     Scaffold(
@@ -95,135 +93,128 @@ fun ScheduleTasksScreen(userName: String, onBackClick: () -> Unit) {
             }
             item {   //botão para abrir o calendario
                 DatePickerButton(onDateSelected = { selectedDate ->
-                    selectedDates = selectedDates + selectedDate     })
+                    taskManager.addItem(selectedDate)
+                })
             }
 
-        // exibir as datas selecionadas
-        if (selectedDates.isNotEmpty()) {
-            item {
-                Text(
-                    text = "Datas Selecionadas: ${
-                        selectedDates.joinToString(",")
-                        { "${it.dayOfMonth}/${it.monthValue}/${it.year}" }
-                    }",
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
+            // exibir as datas selecionadas
+            val selectedDates = taskManager.selectedItems
+            if (selectedDates.isNotEmpty()) {
+                item {
+                    Text(
+                        text = "Datas Selecionadas: ${
+                            selectedDates.joinToString(",")
+                            { "${it.dayOfMonth}/${it.monthValue}/${it.year}" }
+                        }",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
             }
-        }
-        selectedDates.forEach() { date ->
-            item {
-                Text(
-                    text = "Tarefas para ${date.dayOfMonth}/${date.monthValue}/${date.year}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(top = 16.dp)
-                )
-            }
-            item {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                ) {
-                    TextField(
-                        value = newTaskMap[date] ?: "",
-                        onValueChange = { newValue ->
-                            newTaskMap = newTaskMap.toMutableMap().apply {
-                                this[date] = newValue
-                            }
-                        },
-                        placeholder = { Text(text = "Digite uma nova tarefa") },
+            selectedDates.forEach() { date ->
+                item {
+                    Text(
+                        text = "Tarefas para ${date.dayOfMonth}/${date.monthValue}/${date.year}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(top = 16.dp)
+                    )
+                }
+                item {
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 8.dp)
-                    )
-                    Button(
-                        onClick = {
-                            val task = newTaskMap[date]?.trim()
-                            if (!task.isNullOrEmpty()) {
-                                taskMap = taskMap.toMutableMap().apply {
-                                    val currentTasks = this[date] ?: emptyList()
-                                    this[date] = currentTasks + task
-                                }
-                                newTaskMap = newTaskMap.toMutableMap().apply {
-                                    this[date] = ""
-                                }
-                            }
-                        },
-                        modifier = Modifier.align(Alignment.End)
+                            .padding(8.dp)
                     ) {
-                        Text(text = "Adicionar Tarefa")
-                    }
-                    taskMap[date]?.forEach { task ->
-                        Text(
-                            text = "-$task",
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(top = 4.dp)
+                        val newTask = taskManager.getNewTask(date)
+                        TextField(
+                            value = newTask ?: "",
+                            onValueChange = { newValue ->
+                                taskManager.updateNewTask(date, newValue)
+                            },
+                            placeholder = { Text(text = "Digite uma nova tarefa") },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 8.dp)
                         )
-
+                        Button(
+                            onClick = {
+                                taskManager.addTask(date)
+                            },
+                            modifier = Modifier.align(Alignment.End)
+                        ) {
+                            Text(text = "Adicionar Tarefa")
+                        }
+                        taskManager.getTasks(date).forEach { task ->
+                            Text(
+                                text = "-$task",
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.padding(top = 4.dp)
+                            )
+                        }
                     }
                 }
             }
-        }
 
 
-        item {
-            val coroutineScope = rememberCoroutineScope()
+            item {
+                val coroutineScope = rememberCoroutineScope()
 
-            Button(
-                onClick = {
-                    coroutineScope.launch {
-                        snackbarHostState.showSnackbar("Tarefas salvas com sucesso!")
-                    }
-                },
-                enabled = isSaveEnabled,  // habilitado apenas se houver datas selecionadas
-                modifier = Modifier.padding(top = 16.dp)
-            ) {
-                Text(text = "Salvar Tarefas ")
-
-            }
-        }
-    }
-    MaterialDialog(dialogState = dateDialogState, buttons = {
-        positiveButton("Confirmar")
-        negativeButton("Cancelar")
-    }) {
-        // Lista de todas as datas do ano atual
-        val currentYear = Year.now().value
-        val datesInYear = List(Year.of(currentYear).length()) { day ->
-            LocalDate.ofYearDay(currentYear, day + 1)
-        }
-        LazyColumn {
-            items(datesInYear) { date ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                        .clickable {
-                            if (selectedDates.contains(date)) {
-                                selectedDates = selectedDates - date
-                            } else {
-                                selectedDates = selectedDates + date
-                            }
+                Button(
+                    onClick = {
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar("Tarefas salvas com sucesso!")
                         }
+                    },
+                    enabled = selectedDates.isNotEmpty(),  // habilitado apenas se houver datas selecionadas
+                    modifier = Modifier.padding(top = 16.dp)
                 ) {
-                    Checkbox(
-                        checked = selectedDates.contains(date),
-                        onCheckedChange = {
-                            if (it) {
-                                selectedDates = selectedDates + date
-                            } else {
-                                selectedDates = selectedDates - date
+                    Text(text = "Salvar Tarefas ")
+                }
+            }
+        }
+        MaterialDialog(dialogState = dateDialogState, buttons = {
+            positiveButton("Confirmar")
+            negativeButton("Cancelar")
+        }) {
+            // Lista de todas as datas do ano atual
+            val currentYear = Year.now().value
+            val datesInYear = List(Year.of(currentYear).length()) { day ->
+                LocalDate.ofYearDay(currentYear, day + 1)
+            }
+            LazyColumn {
+                items(datesInYear) { date ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                            .clickable {
+                                if (taskManager
+                                        .selectedItems
+                                        .contains(date)
+                                ) {
+                                    taskManager.removeItem(date)
+                                } else {
+                                    taskManager.addItem(date)
+                                }
                             }
-                        }
-                    )
-                    Text(text = "${date.dayOfMonth}/${date.monthValue}/${date.year}")
+                    ) {
+                        Checkbox(
+                            checked = taskManager.selectedItems.contains(date),
+                            onCheckedChange = {
+                                if (it) {
+                                    taskManager.addItem(date)
+                                } else {
+                                    taskManager.removeItem(date)
+                                }
+                            }
+                        )
+                        Text(text = "${date.dayOfMonth}/${date.monthValue}/${date.year}")
+                    }
                 }
             }
         }
     }
-}
 }
 
 @Composable
