@@ -1,5 +1,6 @@
 package com.nicnicdev.suacasasemprelimpa03.ui.screens
 
+import android.app.DatePickerDialog
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,19 +28,21 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import com.nicnicdev.suacasasemprelimpa03.domain.TaskManager
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import java.util.Calendar
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScheduleWeeklyTasksScreen(userName: String, onBackClick: () -> Unit) {
     val taskManager =
-        remember { TaskManager<String>() } // Gerencia semanas como String (ex.: "Semana 3 de 2025")
+        remember { TaskManager<LocalDate>() }
 
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -75,28 +78,28 @@ fun ScheduleWeeklyTasksScreen(userName: String, onBackClick: () -> Unit) {
                     textAlign = TextAlign.Center
                 )
             }
-            // Botão para selecionar semana
+            // Botão para selecionar uma data
             item {
-                WeekPickerButton(onWeekSelected = { selectedWeek ->
-                    taskManager.addItem(selectedWeek)
+                DatePickerButton(onDateSelected = { selectedDate ->
+                    taskManager.addItem(selectedDate)
                 })
             }
             // Exibir semanas selecionadas
-            val selectedWeeks = taskManager.selectedItems
-            if (selectedWeeks.isNotEmpty()) {
+            val selectedDates = taskManager.selectedItems
+            if (selectedDates.isNotEmpty()) {
                 item {
                     Text(
-                        text = "Semanas Selecionadas: ${selectedWeeks.joinToString(", ")}",
+                        text = "Datas Selecionadas: ${selectedDates.joinToString(", "){ "${it.dayOfMonth}/${it.monthValue}/${it.year}" }}",
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(top = 8.dp)
                     )
                 }
             }
-            // Exibir tarefas para cada semana
-            selectedWeeks.forEach { week ->
+            // Exibir tarefas para cada data
+            selectedDates.forEach { date ->
                 item {
                     Text(
-                        text = "Tarefas para $week",
+                        text = "Tarefas para ${date.dayOfMonth}/${date.monthValue}/${date.year}" ,
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(top = 16.dp)
                     )
@@ -107,11 +110,11 @@ fun ScheduleWeeklyTasksScreen(userName: String, onBackClick: () -> Unit) {
                             .fillMaxWidth()
                             .padding(8.dp)
                     ) {
-                        val newTask = taskManager.getNewTask(week)
+                        val newTask = taskManager.getNewTask(date)
                         TextField(
                             value = newTask ?: "",
                             onValueChange = { newValue ->
-                                taskManager.updateNewTask(week, newValue)
+                                taskManager.updateNewTask(date, newValue)
                             },
                             placeholder = { Text(text = "Digite uma nova tarefa") },
                             modifier = Modifier
@@ -120,13 +123,13 @@ fun ScheduleWeeklyTasksScreen(userName: String, onBackClick: () -> Unit) {
                         )
                         Button(
                             onClick = {
-                                taskManager.addTask(week)
+                                taskManager.addTask(date)
                             },
                             modifier = Modifier.align(Alignment.End)
                         ) {
                             Text(text = "Adicionar Tarefa")
                         }
-                        taskManager.getTasks(week).forEach { task ->
+                        taskManager.getTasks(date).forEach { task ->
                             Text(
                                 text = "- $task",
                                 style = MaterialTheme.typography.bodyMedium,
@@ -145,7 +148,7 @@ fun ScheduleWeeklyTasksScreen(userName: String, onBackClick: () -> Unit) {
                             snackbarHostState.showSnackbar("Tarefas salvas com sucesso!")
                         }
                     },
-                    enabled = selectedWeeks.isNotEmpty(),
+                    enabled = selectedDates.isNotEmpty(),
                     modifier = Modifier.padding(top = 16.dp)
                 ) {
                     Text(text = "Salvar Tarefas")
@@ -155,40 +158,7 @@ fun ScheduleWeeklyTasksScreen(userName: String, onBackClick: () -> Unit) {
     }
 }
 
-@Composable
-fun WeekPickerButton(onWeekSelected: (String) -> Unit) {
-    val calendar = Calendar.getInstance()
-    val currentWeek = calendar.get(Calendar.WEEK_OF_YEAR)
-    val year = calendar.get(Calendar.YEAR)
-    val weeksInYear = calendar.getActualMaximum(Calendar.WEEK_OF_YEAR)
 
-
-    val expanded = remember { androidx.compose.runtime.mutableStateOf(false) }
-    val weeks = (1..weeksInYear).map { "Semana $it de $year" }
-
-    Column {
-        Button(
-            onClick = { expanded.value = true },
-            Modifier.padding(top = 16.dp)
-        ) {
-            Text(text = "Selecionar Semana")
-        }
-        DropdownMenu(
-            expanded = expanded.value,
-            onDismissRequest = { expanded.value = false }
-        ) {
-            weeks.forEach { week ->
-                DropdownMenuItem(
-                    text = {Text (text= week) },
-                    onClick = {
-                        onWeekSelected(week)
-                        expanded.value = false
-                    }
-                )
-            }
-        }
-    }
-}
 
 @Preview(showBackground = true)
 @Composable
