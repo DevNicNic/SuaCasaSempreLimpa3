@@ -106,7 +106,7 @@ fun OptionsScreen(navController: NavHostController) {
                 textButton = "Agendar Tarrefas Semanais",
                 descriptionImage = "Imagem para Agendar Tarefas Semanais",
                 resourceImage = R.drawable.imagem3,
-                onClick = {/*ação botão*/ }
+                onClick = {navController.navigate(Screen.ScheduleWeeklyTask.route) }
             )
         }
     }

@@ -13,6 +13,7 @@ import com.nicnicdev.suacasasemprelimpa03.ui.screens.OptionsScreen
 import com.nicnicdev.suacasasemprelimpa03.ui.screens.RegisterScreen
 import com.nicnicdev.suacasasemprelimpa03.ui.screens.RoomTipsScreen
 import com.nicnicdev.suacasasemprelimpa03.ui.screens.ScheduleTasksScreen
+import com.nicnicdev.suacasasemprelimpa03.ui.screens.ScheduleWeeklyTasksScreen
 import com.nicnicdev.suacasasemprelimpa03.ui.screens.TipsHomeScreen
 
 sealed class Screen (val route: String){
@@ -21,6 +22,7 @@ sealed class Screen (val route: String){
     data object Options : Screen ("options_screen")
     data object TipsHome : Screen ( "tips_home_screen")
     data object Shedule : Screen ("shedule_taks_screen")
+    data object ScheduleWeeklyTask : Screen ("schedule_weekly_task_screen")
 
 
     sealed class Category(route: String): Screen(route) {
@@ -81,8 +83,13 @@ fun SetupNavGraph (navController: NavHostController) {
         composable(route = Screen.Category.Room.route) {
             RoomTipsScreen ( onBackClik = {navController.popBackStack()})
         }
+        composable (route = Screen.ScheduleWeeklyTask.route) {
+            ScheduleWeeklyTasksScreen(userName = "Nicole",  onBackClick = {})
+
+            }
+        }
     }
-}
+
 
 
 

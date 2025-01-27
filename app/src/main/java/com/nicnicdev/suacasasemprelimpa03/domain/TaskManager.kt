@@ -25,9 +25,10 @@ class TaskManager<T> {
         newTaskMap = newTaskMap.toMutableMap().apply {
             this[item] = task
         }
+
     }
 
-    fun assTask(item: T) { // Adicionar a nova tarefa ao mapa de tarefas
+    fun addTask(item: T) { // Adicionar a nova tarefa ao mapa de tarefas
         val task = newTaskMap[item]?.trim()
         if (!task.isNullOrEmpty()){
             taskMap = taskMap.toMutableMap().apply {
@@ -42,4 +43,10 @@ class TaskManager<T> {
     fun getTasks(item: T): List<String> { // Obter tarefas associadas a um item
         return taskMap[item] ?: emptyList()
     }
+
+    fun getNewTask(item: T): String? {
+        return newTaskMap[item]
+    }
+
+
 }
